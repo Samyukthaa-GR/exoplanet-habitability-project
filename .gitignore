@@ -1,0 +1,15 @@
+# Environments
+venv/
+env/
+.env
+
+# Data (NASA datasets can get big, keep them local for now)
+data/*.csv
+data/*.json
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
