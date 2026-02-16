@@ -1,15 +1,19 @@
-# Environments
+# Virtual environment
 venv/
-env/
-.env
 
-# Data (NASA datasets can get big, keep them local for now)
-data/*.csv
-data/*.json
+# Python cache
+__pycache__/
+*.pyc
 
-# Jupyter Notebooks
+# Jupyter checkpoints
 .ipynb_checkpoints/
 
-# Python
-__pycache__/
-*.py[cod]
+# Data files (raw large datasets)
+data/raw/
+
+# Models
+models/
+
+# OS files
+.DS_Store
+Thumbs.db
