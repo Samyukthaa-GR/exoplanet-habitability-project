@@ -8,8 +8,9 @@ __pycache__/
 # Jupyter checkpoints
 .ipynb_checkpoints/
 
-# Data files (raw large datasets)
+# Data files
 data/raw/
+data/processed/
 
 # Models
 models/
