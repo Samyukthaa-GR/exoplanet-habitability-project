@@ -1,6 +1,8 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import shap
+import matplotlib.pyplot as plt
 
 st.title("🌍 Exoplanet Habitability Predictor")
 
@@ -8,7 +10,11 @@ st.title("🌍 Exoplanet Habitability Predictor")
 st.write("Loading model...")
 model = joblib.load("models/habitability_model.pkl")
 st.success("✅ Model loaded successfully!")
-#st.write(model.named_steps)
+
+# Load training data for SHAP background
+train_df = pd.read_csv("data/processed/train_final.csv")
+X_train = train_df.drop(columns=["habitable"])
+
 # Sidebar input
 st.sidebar.header("Input Features")
 
@@ -48,10 +54,11 @@ threshold = st.sidebar.slider(
     value=0.5
 )
 
+# Show input
 st.write("Input Data:")
 st.write(sample)
 
-# Prediction using probability + threshold
+# Prediction
 probability = model.predict_proba(sample)[0][1]
 prediction = 1 if probability >= threshold else 0
 
@@ -67,26 +74,38 @@ st.subheader("Habitability Probability")
 st.write(f"{probability:.4f}")
 st.progress(float(probability))
 
-import shap
+# =========================
+# SHAP EXPLANATION (FIXED)
+# =========================
 
 st.subheader("🔍 Model Explanation (SHAP)")
 
-# Correct pipeline steps
+# Extract pipeline steps
 scaler = model.named_steps['scaler']
 lr_model = model.named_steps['model']
 
-# Transform input
+# Transform training data (background)
+X_train_scaled = scaler.transform(X_train)
+
+# Transform current input
 scaled_input = scaler.transform(sample)
 
 # SHAP explainer
-explainer = shap.LinearExplainer(lr_model, scaled_input)
+explainer = shap.LinearExplainer(lr_model, X_train_scaled)
 
 shap_values = explainer.shap_values(scaled_input)
 
-# Convert to readable format
+# Create dataframe
 shap_df = pd.DataFrame({
     "Feature": sample.columns,
     "Impact": shap_values[0]
 }).sort_values(by="Impact", key=abs, ascending=False)
 
-st.write(shap_df)
+# Plot SHAP values
+fig, ax = plt.subplots()
+ax.barh(shap_df["Feature"], shap_df["Impact"])
+ax.set_xlabel("Impact on Prediction")
+ax.set_title("Feature Contribution (SHAP)")
+ax.invert_yaxis()
+
+st.pyplot(fig)
